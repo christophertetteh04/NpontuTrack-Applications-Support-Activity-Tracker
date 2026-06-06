@@ -64,13 +64,7 @@ Visit **http://localhost:8000**
 
 ### Default Credentials (after seeding)
 
-| Role       | Email               | Password   |
-|------------|---------------------|------------|
-| Admin      | admin@npontu.com    | password   |
-| Team Lead  | lead@npontu.com     | password   |
-| Staff      | staff@npontu.com    | password   |
-| Staff      | staff2@npontu.com   | password   |
-
+   
 ---
 
 ## User Roles
