@@ -10,6 +10,18 @@ use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            // restrict export endpoints to team leads and admins
+            $method = $request->route()->getActionMethod();
+            if (in_array($method, ['export', 'exportExcel', 'exportPdf']) && (!auth()->user() || !auth()->user()->isTeamLead())) {
+                abort(403, 'Only Team Leads and Admins can export reports.');
+            }
+            return $next($request);
+        });
+    }
+
     public function index(Request $request)
     {
         $filters = $request->validate([
@@ -123,6 +135,87 @@ class ReportController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        // Prefer maatwebsite/excel if available
+        if (!class_exists(\Maatwebsite\Excel\Facades\Excel::class)) {
+            return redirect()->route('reports.index')->with('error', 'Excel export not available. Install maatwebsite/excel.');
+        }
+
+        $filters  = $request->validate([
+            'date_from'   => 'nullable|date',
+            'date_to'     => 'nullable|date|after_or_equal:date_from',
+            'activity_id' => 'nullable|exists:activities,id',
+            'user_id'     => 'nullable|exists:users,id',
+            'status'      => 'nullable|in:pending,in_progress,done,escalated',
+            'category'    => 'nullable|string',
+            'shift'       => 'nullable|in:morning,afternoon,night',
+        ]);
+
+        $dateFrom = $filters['date_from'] ?? Carbon::now()->startOfMonth()->toDateString();
+        $dateTo   = $filters['date_to']   ?? Carbon::today()->toDateString();
+
+        $query = ActivityLog::with(['activity', 'updater'])
+            ->forDateRange($dateFrom, $dateTo)
+            ->orderBy('log_date', 'desc');
+
+        if (!empty($filters['activity_id'])) $query->where('activity_id', $filters['activity_id']);
+        if (!empty($filters['user_id']))     $query->where('updated_by', $filters['user_id']);
+        if (!empty($filters['status']))      $query->where('status', $filters['status']);
+        if (!empty($filters['category']))    $query->whereHas('activity', fn($q) => $q->where('category', $filters['category']));
+        if (!empty($filters['shift']))       $query->where('shift', $filters['shift']);
+
+        $logs = $query->get();
+
+        $export = new \App\Exports\ActivityLogsExport($logs);
+        $fileName = "activity-report-{$dateFrom}-to-{$dateTo}.xlsx";
+        return \Maatwebsite\Excel\Facades\Excel::download($export, $fileName);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        if (!class_exists(\Dompdf\Dompdf::class) && !class_exists(\Barryvdh\DomPDF\Facade::class)) {
+            return redirect()->route('reports.index')->with('error', 'PDF export not available. Install barryvdh/laravel-dompdf.');
+        }
+
+        $filters  = $request->validate([
+            'date_from'   => 'nullable|date',
+            'date_to'     => 'nullable|date|after_or_equal:date_from',
+            'activity_id' => 'nullable|exists:activities,id',
+            'user_id'     => 'nullable|exists:users,id',
+            'status'      => 'nullable|in:pending,in_progress,done,escalated',
+            'category'    => 'nullable|string',
+            'shift'       => 'nullable|in:morning,afternoon,night',
+        ]);
+
+        $dateFrom = $filters['date_from'] ?? Carbon::now()->startOfMonth()->toDateString();
+        $dateTo   = $filters['date_to']   ?? Carbon::today()->toDateString();
+
+        $query = ActivityLog::with(['activity', 'updater'])
+            ->forDateRange($dateFrom, $dateTo)
+            ->orderBy('log_date', 'desc');
+
+        if (!empty($filters['activity_id'])) $query->where('activity_id', $filters['activity_id']);
+        if (!empty($filters['user_id']))     $query->where('updated_by', $filters['user_id']);
+        if (!empty($filters['status']))      $query->where('status', $filters['status']);
+        if (!empty($filters['category']))    $query->whereHas('activity', fn($q) => $q->where('category', $filters['category']));
+        if (!empty($filters['shift']))       $query->where('shift', $filters['shift']);
+
+        $logs = $query->get();
+
+        $html = view('reports.pdf', compact('logs', 'dateFrom', 'dateTo'))->render();
+
+        if (class_exists(\Barryvdh\DomPDF\Facade::class)) {
+            $pdf = \Barryvdh\DomPDF\Facade::loadHtml($html);
+            return $pdf->download("activity-report-{$dateFrom}-to-{$dateTo}.pdf");
+        }
+
+        $dompdf = new \Dompdf\Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->render();
+        $dompdf->stream("activity-report-{$dateFrom}-to-{$dateTo}.pdf");
     }
 
     public function daily(Request $request)

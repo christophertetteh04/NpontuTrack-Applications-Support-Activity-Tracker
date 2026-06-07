@@ -10,13 +10,8 @@ class ActivityController extends Controller
 {
     public function __construct()
     {
-        
-        $this->middleware(function ($request, $next) {
-            if (!Auth::user()->isTeamLead() && in_array($request->route()->getActionMethod(), ['create', 'store', 'edit', 'update', 'destroy'])) {
-                abort(403, 'Only Team Leads and Admins can manage activity definitions.');
-            }
-            return $next($request);
-        });
+        // Authorize using policies defined in ActivityPolicy
+        $this->middleware('auth');
     }
 
     public function index()
@@ -32,11 +27,13 @@ class ActivityController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Activity::class);
         return view('activities.create');
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', Activity::class);
         $data = $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -56,11 +53,13 @@ class ActivityController extends Controller
 
     public function edit(Activity $activity)
     {
+        $this->authorize('update', $activity);
         return view('activities.edit', compact('activity'));
     }
 
     public function update(Request $request, Activity $activity)
     {
+        $this->authorize('update', $activity);
         $data = $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -79,8 +78,9 @@ class ActivityController extends Controller
 
     public function destroy(Activity $activity)
     {
-        $activity->update(['is_active' => false]);
+        $this->authorize('delete', $activity);
+        $activity->delete(); // This will trigger soft delete now
         return redirect()->route('activities.index')
-            ->with('success', 'Activity deactivated.');
+            ->with('success', 'Activity deleted successfully.');
     }
 }

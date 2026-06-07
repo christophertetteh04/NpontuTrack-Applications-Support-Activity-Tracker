@@ -110,6 +110,35 @@ Visit **http://localhost:8000**
 - Create/edit team members with employee ID, department, role, phone
 - Activate/deactivate accounts without deletion
 
+### Exports
+
+- CSV export is available from the Reports view. Use the Export CSV button to download filtered results.
+- Excel export: `GET /reports/export/excel` (requires `maatwebsite/excel` package). Example:
+
+```bash
+composer require maatwebsite/excel
+```
+
+- PDF export: `GET /reports/export/pdf` (requires `barryvdh/laravel-dompdf` or `dompdf/dompdf`). Example:
+
+```bash
+composer require barryvdh/laravel-dompdf
+```
+
+### Deployment
+
+Provided artifacts:
+
+- `Dockerfile` for building a PHP 8.2 FPM container
+- GitHub Actions workflow at `.github/workflows/ci.yml` to run migrations and tests on push
+
+To build locally with Docker:
+
+```bash
+docker build -t npontutrack:latest .
+docker run -p 8000:9000 npontutrack:latest
+```
+
 ---
 
 ## Database Schema

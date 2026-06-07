@@ -97,6 +97,24 @@
             </table>
         </div>
         <?php endif; ?>
+
+        <?php if(auth()->user()->isTeamLead()): ?>
+        <div class="mt-4 flex gap-3">
+            <a href="<?php echo e(route('handover.index')); ?>"
+                class="text-xs text-gray-600 hover:text-gray-900 px-3 py-2 hover:bg-gray-100 rounded-lg transition">
+                View Full Handover →
+            </a>
+            <div class="flex-1"></div>
+            <a href="<?php echo e(route('handover.seal.create', ['date' => $date, 'shift' => 'morning'])); ?>"
+                class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg transition border border-blue-200 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Seal Shift
+            </a>
+        </div>
+        <?php endif; ?>
     </div>
 
     <div class="space-y-3">
@@ -204,34 +222,46 @@
                 <p class="text-xs font-mono text-gray-400 mb-2">Update timeline (<?php echo e($carbonDate->format('d M')); ?>)</p>
                 <div class="space-y-2">
                     <?php $__currentLoopData = $logs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $log): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <div class="flex items-start gap-3 text-xs">
-
-                        <span class="font-mono text-gray-400 shrink-0 w-14">
-                            <?php echo e($log->updated_at_time->format('H:i')); ?>
-
-                        </span>
-
-                        <span class="shrink-0">
-                            <span class="font-medium text-gray-700"><?php echo e($log->updater->name); ?></span>
-                            <span class="text-gray-400 font-mono"> [<?php echo e($log->updater->employee_id); ?>]</span>
-                        </span>
-
-                        <span class="shrink-0 px-1.5 py-0.5 rounded text-xs status-<?php echo e($log->status); ?>">
-                            <?php echo e($log->status_label); ?>
-
-                        </span>
-
-                        <?php if($log->remark): ?>
-                        <span class="text-gray-500 italic truncate">— <?php echo e($log->remark); ?></span>
+                    <div class="space-y-1">
+                        <?php if($log->change_tracking_label): ?>
+                        <div class="text-xs text-blue-600 flex items-center gap-2">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span><?php echo $log->change_tracking_label; ?></span>
+                        </div>
                         <?php endif; ?>
 
-                        <?php if($log->actual_value): ?>
-                        <span class="text-gray-400 font-mono ml-auto shrink-0">
-                            <?php echo e($log->actual_value); ?>
+                        <div class="flex items-start gap-3 text-xs">
+                            <span class="font-mono text-gray-400 shrink-0 w-14">
+                                <?php echo e($log->updated_at_time->format('H:i')); ?>
 
-                            <?php if($log->expected_value): ?> / <?php echo e($log->expected_value); ?> <?php endif; ?>
-                        </span>
-                        <?php endif; ?>
+                            </span>
+
+                            <span class="shrink-0">
+                                <span class="font-medium text-gray-700"><?php echo e($log->updater->name); ?></span>
+                                <span class="text-gray-400 font-mono"> [<?php echo e($log->updater->employee_id); ?>]</span>
+                            </span>
+
+                            <span class="shrink-0 px-1.5 py-0.5 rounded text-xs status-<?php echo e($log->status); ?>">
+                                <?php echo e($log->status_label); ?>
+
+                            </span>
+
+                            <?php if($log->remark): ?>
+                            <span class="text-gray-500 italic truncate">— <?php echo e($log->remark); ?></span>
+                            <?php endif; ?>
+
+                            <?php if($log->actual_value): ?>
+                            <span class="text-gray-400 font-mono ml-auto shrink-0">
+                                <?php echo e($log->actual_value); ?>
+
+                                <?php if($log->expected_value): ?> / <?php echo e($log->expected_value); ?> <?php endif; ?>
+                            </span>
+                            <?php endif; ?>
+                        </div>
                     </div>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
@@ -345,40 +375,57 @@
 </div>
 
 <script>
-let currentActivityId = null;
+document.addEventListener('DOMContentLoaded', function() {
+    let currentActivityId = null;
 
-function openUpdateModal(button) {
-    currentActivityId = button.dataset.activityId;
-    document.getElementById('modal-title').textContent = button.dataset.activityTitle;
-    document.getElementById('modal-log-date').value = button.dataset.logDate;
-    document.getElementById('update-modal').classList.remove('hidden');
-}
+    // Expose for inline onclick handlers on buttons
+    window.openUpdateModal = function(button) {
+        currentActivityId = button.dataset.activityId;
+        const title = button.dataset.activityTitle || '';
+        const date = button.dataset.logDate || '';
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-log-date').value = date;
+        const modal = document.getElementById('update-modal');
+        modal.classList.remove('hidden');
+        // focus first input for accessibility
+        const firstField = modal.querySelector('select[name="status"]') || modal.querySelector(
+            'input, textarea');
+        if (firstField) firstField.focus();
+    };
 
-function closeUpdateModal() {
-    document.getElementById('update-modal').classList.add('hidden');
-    document.getElementById('update-form').reset();
-}
+    window.closeUpdateModal = function() {
+        const modal = document.getElementById('update-modal');
+        modal.classList.add('hidden');
+        const form = document.getElementById('update-form');
+        if (form) form.reset();
+    };
 
-document.getElementById('update-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const form = this;
-    const data = new FormData(form);
-    const url = `/activities/${currentActivityId}/log`;
+    const updateForm = document.getElementById('update-form');
+    if (updateForm) {
+        updateForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const form = this;
+            const data = new FormData(form);
+            const url = `/activities/${currentActivityId}/log`;
 
-    const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-            'Accept': 'application/json'
-        },
-        body: data,
-    });
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                    'Accept': 'application/json'
+                },
+                body: data,
+            });
 
-    if (res.ok) {
-        closeUpdateModal();
-        window.location.reload();
-    } else {
-        alert('Failed to save update. Please try again.');
+            if (res.ok) {
+                closeUpdateModal();
+                window.location.reload();
+            } else {
+                const err = await res.json().catch(() => null);
+                alert((err && err.message) ? err.message :
+                    'Failed to save update. Please try again.');
+            }
+        });
     }
 });
 </script>

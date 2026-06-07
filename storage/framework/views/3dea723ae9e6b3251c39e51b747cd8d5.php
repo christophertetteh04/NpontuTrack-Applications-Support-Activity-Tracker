@@ -1,2 +1,0 @@
-
-<?php echo $__env->make('users.create', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /Users/imac/Desktop/Nodejs Backend/npontu-tracker/resources/views/users/edit.blade.php ENDPATH**/ ?>

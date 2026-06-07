@@ -7,11 +7,33 @@ use App\Models\ActivityLog;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 
 class ActivityLogController extends Controller
 {
-        public function store(Request $request, Activity $activity)
+    public function store(Request $request, Activity $activity)
     {
+        // Rate limiting: 10 updates per minute per user
+        $limiter = RateLimiter::attempt(
+            'activity-log-' . Auth::id(),
+            10,
+            function () {
+                // Callback executed if limit not exceeded
+                return true;
+            },
+            60
+        );
+
+        if (!$limiter) {
+            if ($request->expectsJson()) {
+                return response()->json(
+                    ['error' => 'Too many updates. Please try again later.'],
+                    429
+                );
+            }
+            return back()->with('error', 'Too many updates. Please try again later.');
+        }
+
         $data = $request->validate([
             'status'         => 'required|in:pending,in_progress,done,escalated',
             'remark'         => 'nullable|string|max:1000',
@@ -24,17 +46,26 @@ class ActivityLogController extends Controller
 
         $logDate = $data['log_date'] ?? Carbon::today()->toDateString();
 
+        // Get previous status from latest log for this activity on this date
+        $previousStatus = ActivityLog::where('activity_id', $activity->id)
+            ->where('log_date', $logDate)
+            ->latest('updated_at_time')
+            ->first()
+            ?->status;
+
         ActivityLog::create([
             'activity_id'    => $activity->id,
             'updated_by'     => Auth::id(),
             'log_date'       => $logDate,
             'status'         => $data['status'],
+            'previous_status'=> $previousStatus,
             'remark'         => $data['remark'] ?? null,
             'expected_value' => $data['expected_value'] ?? null,
             'actual_value'   => $data['actual_value'] ?? null,
             'variance'       => $data['variance'] ?? null,
             'shift'          => $data['shift'] ?? null,
             'updated_at_time'=> Carbon::now(),
+            'ip_address'     => $request->ip(),
         ]);
 
         if ($request->expectsJson()) {

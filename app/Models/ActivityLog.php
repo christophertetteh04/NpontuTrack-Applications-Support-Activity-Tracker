@@ -12,12 +12,14 @@ class ActivityLog extends Model
         'updated_by',
         'log_date',
         'status',
+        'previous_status',
         'remark',
         'expected_value',
         'actual_value',
         'variance',
         'shift',
         'updated_at_time',
+        'ip_address',
     ];
 
     protected function casts(): array
@@ -79,5 +81,23 @@ class ActivityLog extends Model
             'escalated'   => 'Escalated',
             default       => 'Pending',
         };
+    }
+
+    public function getChangeTrackingLabelAttribute(): ?string
+    {
+        if (!$this->previous_status || $this->previous_status === $this->status) {
+            return null;
+        }
+
+        $oldLabel = match ($this->previous_status) {
+            'done'        => 'Done',
+            'in_progress' => 'In Progress',
+            'escalated'   => 'Escalated',
+            default       => 'Pending',
+        };
+
+        $newLabel = $this->status_label;
+
+        return "{$this->updater->name} changed status from <strong>{$oldLabel}</strong> to <strong>{$newLabel}</strong>";
     }
 }
