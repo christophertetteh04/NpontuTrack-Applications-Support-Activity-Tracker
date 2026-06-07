@@ -13,12 +13,10 @@ class ActivityLogController extends Controller
 {
     public function store(Request $request, Activity $activity)
     {
-        // Rate limiting: 10 updates per minute per user
         $limiter = RateLimiter::attempt(
             'activity-log-' . Auth::id(),
             10,
             function () {
-                // Callback executed if limit not exceeded
                 return true;
             },
             60
@@ -46,7 +44,6 @@ class ActivityLogController extends Controller
 
         $logDate = $data['log_date'] ?? Carbon::today()->toDateString();
 
-        // Get previous status from latest log for this activity on this date
         $previousStatus = ActivityLog::where('activity_id', $activity->id)
             ->where('log_date', $logDate)
             ->latest('updated_at_time')
@@ -99,7 +96,7 @@ class ActivityLogController extends Controller
                     'actual_value'   => $l->actual_value,
                     'variance'       => $l->variance,
                     'shift'          => $l->shift,
-                    'updated_at_time'=> $l->updated_at_time->format('H:i:s'),
+                    'updated_at_time'=> Carbon::parse($l->updated_at_time)->format('H:i:s'),
                     'updater_name'   => $l->updater->name,
                     'updater_id'     => $l->updater->employee_id,
                     'updater_role'   => $l->updater->role,

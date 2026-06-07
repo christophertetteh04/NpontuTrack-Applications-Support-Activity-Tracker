@@ -1,0 +1,23 @@
+# Ignore source control files
+.git
+.gitignore
+
+# Ignore local dependencies and build folders
+node_modules/
+dist/
+build/
+target/
+
+# Ignore logs and temp files
+*.log
+*.tmp
+.cache/
+
+# Ignore local environment variables and secrets (CRITICAL)
+.env
+*.pem
+secrets.txt
+
+# Ignore Docker configurations
+docker-compose.yml
+.dockerignore

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Activity;
 use App\Models\ActivityLog;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -15,7 +14,7 @@ class DashboardController extends Controller
         $date = $request->input('date', Carbon::today()->toDateString());
         $carbonDate = Carbon::parse($date);
 
-        $activities = Activity::active()
+        $activities = Activity::where('is_active', 1)
             ->orderBy('category')
             ->orderBy('sort_order')
             ->with(['logs' => function ($q) use ($date) {
@@ -28,7 +27,7 @@ class DashboardController extends Controller
         $grouped = $activities->groupBy('category');
 
         $todaysLogs = ActivityLog::with(['activity', 'updater'])
-            ->forDate($date)
+            ->where('log_date', $date)
             ->orderBy('updated_at_time', 'desc')
             ->get();
 
@@ -48,7 +47,7 @@ class DashboardController extends Controller
                 'employee_id' => $logs->first()->updater->employee_id,
                 'role'        => $logs->first()->updater->role,
                 'count'       => $logs->count(),
-                'latest_time' => $logs->first()->updated_at_time->format('H:i'),
+                'latest_time' => Carbon::parse($logs->first()->updated_at_time)->format('H:i'),
             ])
             ->values();
 
@@ -70,7 +69,7 @@ class DashboardController extends Controller
         public function stats(Request $request)
     {
         $date = $request->input('date', Carbon::today()->toDateString());
-        $logs = ActivityLog::forDate($date)->get();
+        $logs = ActivityLog::where('log_date', $date)->get();
 
         return response()->json([
             'done'      => $logs->where('status', 'done')->unique('activity_id')->count(),

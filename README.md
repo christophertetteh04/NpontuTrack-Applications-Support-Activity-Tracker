@@ -6,7 +6,7 @@ A Laravel 11 web application for tracking daily activities of an Applications Su
 
 ## Requirements Addressed
 
-| #   | Requirement                                              | Implementation                                                                             |
+| #   | Requirement Implementation                               |
 | --- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | 1   | Input daily activities (e.g. SMS count vs log count)     | `activities` table + `expected_value` / `actual_value` / `variance` fields on every update |
 | 2   | Update status (done/pending) + remark per activity       | `ActivityLogController@store` — status enum + remark field                                 |
@@ -132,11 +132,15 @@ Provided artifacts:
 - `Dockerfile` for building a PHP 8.2 FPM container
 - GitHub Actions workflow at `.github/workflows/ci.yml` to run migrations and tests on push
 
-To build locally with Docker:
+To deploy using Docker Compose (Production-like environment):
 
 ```bash
-docker build -t npontutrack:latest .
-docker run -p 8000:9000 npontutrack:latest
+
+# 2. Start the services
+docker-compose up -d --build
+
+# 3. Run migrations inside the container
+docker-compose exec app php artisan migrate
 ```
 
 ---
