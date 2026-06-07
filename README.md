@@ -6,16 +6,14 @@ A Laravel 11 web application for tracking daily activities of an Applications Su
 
 ## Requirements Addressed
 
-| #   | Requirement Implementation                               |
-| --- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| 1   | Input daily activities (e.g. SMS count vs log count)     | `activities` table + `expected_value` / `actual_value` / `variance` fields on every update |
-| 2   | Update status (done/pending) + remark per activity       | `ActivityLogController@store` — status enum + remark field                                 |
-| 3   | Capture bio details of updater + timestamp               | `updated_by` FK → users, `updated_at_time` timestamp auto-set                              |
-| 4   | Handover view — all updates per activity per day visible | Dashboard shows full timeline per activity; Daily Summary report                           |
-| 5   | Reporting by custom date range                           | Reports page with date range, activity, category, personnel, status filters + CSV export   |
-| 6   | User authentication                                      | Laravel Auth middleware, login/logout, role-based access                                   |
+# Requirement Implementation
 
----
+1 Input daily activities (e.g. SMS count vs log count) - `activities` table + `expected_value` / `actual_value` / `variance` fields on every update
+2 Update status (done/pending) + remark per activity -- `ActivityLogController@store` — status enum + remark field  
+ 3 Capture bio details of updater + timestamp - `updated_by` FK → users, `updated_at_time` timestamp auto-set  
+ 4 Handover view — all updates per activity per day visible - Dashboard shows full timeline per activity; Daily Summary report  
+ 5 Reporting by custom date range - Reports page with date range, activity, category, personnel, status filters + CSV export
+6 User authentication - Laravel Auth middleware, login/logout, role-based access
 
 ## Tech Stack
 
@@ -24,8 +22,6 @@ A Laravel 11 web application for tracking daily activities of an Applications Su
 - **Auth:** Laravel built-in session auth
 - **UI:** Blade templates + Tailwind CSS CDN + IBM Plex Sans/Mono
 - **No additional JS frameworks** — vanilla JS for modal interactions
-
----
 
 ## Installation
 
@@ -61,25 +57,21 @@ php artisan db:seed
 php artisan serve
 ```
 
-Visit **http://localhost:8000**
+Visit http://localhost:8000
 
 ### Default Credentials (after seeding)
 
----
-
 ## User Roles
 
-| Role          | Permissions                                                |
-| ------------- | ---------------------------------------------------------- |
-| **Admin**     | Full access — manage users, activities, view all reports   |
-| **Team Lead** | Manage activity definitions, update statuses, view reports |
-| **Staff**     | Update activity statuses, view dashboard and reports       |
+Role - Permissions
 
----
+**Admin** - Full access — manage users, activities, view all reports  
+ **Team Lead** - Manage activity definitions, update statuses, view reports
+**Staff** - Update activity statuses, view dashboard and reports
 
 ## Key Features
 
-### Daily Dashboard (`/`)
+## Daily Dashboard (`/`)
 
 - Date-navigable board showing all activities grouped by category
 - Each activity card shows its full **update timeline** for the selected date
@@ -142,8 +134,6 @@ docker-compose up -d --build
 # 3. Run migrations inside the container
 docker-compose exec app php artisan migrate
 ```
-
----
 
 ## Database Schema
 
