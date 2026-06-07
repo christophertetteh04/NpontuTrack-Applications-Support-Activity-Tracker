@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // ── 1. Seed Users ──────────────────────────────────────────
+        
         $admin = User::create([
             'name'        => 'Kwame Asante',
             'employee_id' => 'NPT-001',
@@ -62,9 +62,9 @@ class DatabaseSeeder extends Seeder
             'is_active'   => true,
         ]);
 
-        // ── 2. Seed Activities ─────────────────────────────────────
+        
         $activities = [
-            // SMS Monitoring (Requirement 1 focus)
+            
             ['category' => 'SMS Monitoring', 'sort_order' => 1,
              'title'   => 'Daily SMS count in comparison to SMS count from logs',
              'description' => 'Compare the total SMS dispatched with what is recorded in the system logs. Investigate any variance > 1%.'],
@@ -75,7 +75,7 @@ class DatabaseSeeder extends Seeder
              'title'   => 'Failed SMS delivery report review',
              'description' => 'Pull the failed delivery report and re-queue or escalate as appropriate.'],
 
-            // System Health
+            
             ['category' => 'System Health', 'sort_order' => 1,
              'title'   => 'Application server CPU and memory check',
              'description' => 'Ensure no server is above 80% CPU or memory utilisation.'],
@@ -86,7 +86,7 @@ class DatabaseSeeder extends Seeder
              'title'   => 'Disk space monitoring',
              'description' => 'Alert if any volume exceeds 75% usage.'],
 
-            // Incident Management
+            
             ['category' => 'Incident Management', 'sort_order' => 1,
              'title'   => 'Open incident ticket review',
              'description' => 'Review all open tickets and update statuses. Escalate any ticket older than 4 hours.'],
@@ -94,7 +94,7 @@ class DatabaseSeeder extends Seeder
              'title'   => 'Escalation follow-up',
              'description' => 'Follow up on tickets escalated to Tier 2 or vendor.'],
 
-            // End-of-Day
+            
             ['category' => 'End-of-Day Tasks', 'sort_order' => 1,
              'title'   => 'Handover notes compilation',
              'description' => 'Compile all pending activities, escalations, and observations for the incoming shift.'],
@@ -108,7 +108,7 @@ class DatabaseSeeder extends Seeder
             $activityModels[] = Activity::create(array_merge($a, ['created_by' => $lead->id]));
         }
 
-        // ── 3. Seed Activity Logs (last 7 days) ────────────────────
+        
         $users = [$admin, $lead, $staff, $staff2];
         $shifts = ['morning', 'afternoon', 'night'];
         $statuses = ['pending', 'in_progress', 'done', 'done', 'done', 'escalated'];
@@ -117,7 +117,7 @@ class DatabaseSeeder extends Seeder
             $date = Carbon::today()->subDays($daysAgo)->toDateString();
 
             foreach ($activityModels as $activity) {
-                // 1–3 updates per activity per day from different personnel
+                
                 $numUpdates = rand(1, 3);
                 $baseTime   = Carbon::parse($date)->setHour(8);
 
@@ -137,7 +137,7 @@ class DatabaseSeeder extends Seeder
                         'updated_at_time'=> $logTime,
                     ];
 
-                    // Add metric fields for SMS activity
+                    
                     if (str_contains($activity->title, 'SMS count')) {
                         $expected = rand(9800, 10200);
                         $actual   = $expected + rand(-150, 150);

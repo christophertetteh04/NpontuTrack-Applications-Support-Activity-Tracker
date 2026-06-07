@@ -6,14 +6,14 @@ A Laravel 11 web application for tracking daily activities of an Applications Su
 
 ## Requirements Addressed
 
-| # | Requirement | Implementation |
-|---|-------------|---------------|
-| 1 | Input daily activities (e.g. SMS count vs log count) | `activities` table + `expected_value` / `actual_value` / `variance` fields on every update |
-| 2 | Update status (done/pending) + remark per activity | `ActivityLogController@store` — status enum + remark field |
-| 3 | Capture bio details of updater + timestamp | `updated_by` FK → users, `updated_at_time` timestamp auto-set |
-| 4 | Handover view — all updates per activity per day visible | Dashboard shows full timeline per activity; Daily Summary report |
-| 5 | Reporting by custom date range | Reports page with date range, activity, category, personnel, status filters + CSV export |
-| 6 | User authentication | Laravel Auth middleware, login/logout, role-based access |
+| #   | Requirement                                              | Implementation                                                                             |
+| --- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| 1   | Input daily activities (e.g. SMS count vs log count)     | `activities` table + `expected_value` / `actual_value` / `variance` fields on every update |
+| 2   | Update status (done/pending) + remark per activity       | `ActivityLogController@store` — status enum + remark field                                 |
+| 3   | Capture bio details of updater + timestamp               | `updated_by` FK → users, `updated_at_time` timestamp auto-set                              |
+| 4   | Handover view — all updates per activity per day visible | Dashboard shows full timeline per activity; Daily Summary report                           |
+| 5   | Reporting by custom date range                           | Reports page with date range, activity, category, personnel, status filters + CSV export   |
+| 6   | User authentication                                      | Laravel Auth middleware, login/logout, role-based access                                   |
 
 ---
 
@@ -30,6 +30,7 @@ A Laravel 11 web application for tracking daily activities of an Applications Su
 ## Installation
 
 ### Prerequisites
+
 - PHP 8.2+
 - Composer
 - Node.js (optional, for Vite asset compilation if extending)
@@ -64,43 +65,48 @@ Visit **http://localhost:8000**
 
 ### Default Credentials (after seeding)
 
-   
 ---
 
 ## User Roles
 
-| Role       | Permissions |
-|------------|-------------|
-| **Admin**  | Full access — manage users, activities, view all reports |
+| Role          | Permissions                                                |
+| ------------- | ---------------------------------------------------------- |
+| **Admin**     | Full access — manage users, activities, view all reports   |
 | **Team Lead** | Manage activity definitions, update statuses, view reports |
-| **Staff**  | Update activity statuses, view dashboard and reports |
+| **Staff**     | Update activity statuses, view dashboard and reports       |
 
 ---
 
 ## Key Features
 
 ### Daily Dashboard (`/`)
+
 - Date-navigable board showing all activities grouped by category
 - Each activity card shows its full **update timeline** for the selected date
 - Each update entry shows: time, personnel name + employee ID, status, remark, and metric values
 - "Update" button opens a modal capturing status, remark, SMS/metric values, shift, and timestamp automatically
 
 ### Activity Management (`/activities`)
+
 - Team Leads and Admins can create/edit/deactivate activity definitions
 - Activities have categories for grouping and a sort order for display priority
 - `datalist` suggestions for common categories (SMS Monitoring, System Health, etc.)
 
 ### Daily Summary Report (`/reports/daily`)
+
 - Printable daily view showing every activity with its complete update history
 - Latest update flagged with "← LATEST" indicator for easy handover reading
+- New handover board surfaces the latest pending updates and active contributors for day-to-day shift handovers
 
 ### History Reports (`/reports`)
+
 - Filter by: date range, activity, category, status, personnel, shift
 - Aggregate summary cards (total updates, done, pending, escalated, days covered, staff count)
 - Paginated results table (50 per page)
 - **CSV export** of filtered results
 
 ### User Management (`/users`) — Admin only
+
 - Create/edit team members with employee ID, department, role, phone
 - Activate/deactivate accounts without deletion
 

@@ -23,7 +23,7 @@ class Activity extends Model
         ];
     }
 
-    // ── Relationships ──────────────────────────────────────────────
+    
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -34,10 +34,7 @@ class Activity extends Model
         return $this->hasMany(ActivityLog::class);
     }
 
-    /**
-     * Returns the most recent log for a given date.
-     */
-    public function latestLogForDate(string $date)
+        public function latestLogForDate(string $date)
     {
         return $this->logs()
             ->where('log_date', $date)
@@ -45,10 +42,7 @@ class Activity extends Model
             ->first();
     }
 
-    /**
-     * Returns ALL logs for a date ordered chronologically (for handover view).
-     */
-    public function logsForDate(string $date)
+        public function logsForDate(string $date)
     {
         return $this->logs()
             ->with('updater')
@@ -57,7 +51,7 @@ class Activity extends Model
             ->get();
     }
 
-    // ── Scopes ─────────────────────────────────────────────────────
+    
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);

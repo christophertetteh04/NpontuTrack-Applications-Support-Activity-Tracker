@@ -28,7 +28,7 @@ class ActivityLog extends Model
         ];
     }
 
-    // ── Relationships ──────────────────────────────────────────────
+    
     public function activity()
     {
         return $this->belongsTo(Activity::class);
@@ -39,7 +39,7 @@ class ActivityLog extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    // ── Scopes ─────────────────────────────────────────────────────
+    
     public function scopeForDate(Builder $query, string $date): Builder
     {
         return $query->where('log_date', $date);
@@ -60,14 +60,14 @@ class ActivityLog extends Model
         return $query->where('status', $status);
     }
 
-    // ── Helpers ────────────────────────────────────────────────────
+    
     public function getStatusBadgeColorAttribute(): string
     {
         return match ($this->status) {
             'done'        => 'green',
             'in_progress' => 'blue',
             'escalated'   => 'red',
-            default       => 'amber',   // pending
+            default       => 'amber',   
         };
     }
 

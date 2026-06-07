@@ -10,12 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ActivityLogController extends Controller
 {
-    /**
-     * Store a new status update for an activity.
-     * Requirement 2: update status + remark
-     * Requirement 3: capture personnel bio + timestamp automatically
-     */
-    public function store(Request $request, Activity $activity)
+        public function store(Request $request, Activity $activity)
     {
         $data = $request->validate([
             'status'         => 'required|in:pending,in_progress,done,escalated',
@@ -31,7 +26,7 @@ class ActivityLogController extends Controller
 
         ActivityLog::create([
             'activity_id'    => $activity->id,
-            'updated_by'     => Auth::id(),          // Req 3: who updated
+            'updated_by'     => Auth::id(),
             'log_date'       => $logDate,
             'status'         => $data['status'],
             'remark'         => $data['remark'] ?? null,
@@ -39,7 +34,7 @@ class ActivityLogController extends Controller
             'actual_value'   => $data['actual_value'] ?? null,
             'variance'       => $data['variance'] ?? null,
             'shift'          => $data['shift'] ?? null,
-            'updated_at_time'=> Carbon::now(),        // Req 3: exact time
+            'updated_at_time'=> Carbon::now(),
         ]);
 
         if ($request->expectsJson()) {
@@ -49,11 +44,7 @@ class ActivityLogController extends Controller
         return redirect()->back()->with('success', "Activity '{$activity->title}' updated.");
     }
 
-    /**
-     * Show full update history for a single activity on a given date.
-     * Requirement 4: all updates visible for handover.
-     */
-    public function history(Request $request, Activity $activity)
+        public function history(Request $request, Activity $activity)
     {
         $date = $request->input('date', Carbon::today()->toDateString());
 

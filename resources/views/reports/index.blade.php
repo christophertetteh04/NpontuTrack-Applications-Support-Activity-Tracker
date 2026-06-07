@@ -13,7 +13,6 @@
 
 @section('content')
 
-{{-- ── Filter Form ──────────────────────────────────────────────── --}}
 <form method="GET" action="{{ route('reports.index') }}" class="bg-white rounded-xl border border-gray-100 p-5 mb-6">
     <p class="text-xs font-mono text-gray-400 mb-4 uppercase tracking-widest">Filter — Custom Duration Query</p>
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 items-end">
@@ -71,7 +70,6 @@
     </div>
 </form>
 
-{{-- ── Summary Cards ─────────────────────────────────────────────── --}}
 <div class="grid grid-cols-3 md:grid-cols-6 gap-3 mb-6">
     @php
     $sumCards = [
@@ -91,7 +89,6 @@
     @endforeach
 </div>
 
-{{-- ── Results Table ─────────────────────────────────────────────── --}}
 <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
     <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
         <p class="text-sm font-medium text-gray-700">

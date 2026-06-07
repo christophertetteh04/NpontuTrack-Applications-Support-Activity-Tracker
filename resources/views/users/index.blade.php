@@ -15,7 +15,7 @@
                 <th class="px-5 py-3 text-left">Name</th>
                 <th class="px-5 py-3 text-left">Employee ID</th>
                 <th class="px-5 py-3 text-left">Email</th>
-                <th class="px-5 py-3 text-left">Department</th>
+                <th class="px-5 py-3 text-left">Designation / Department</th>
                 <th class="px-5 py-3 text-left">Role</th>
                 <th class="px-5 py-3 text-left">Status</th>
                 <th class="px-5 py-3 text-left">Actions</th>
@@ -34,7 +34,10 @@
                 </td>
                 <td class="px-5 py-3 font-mono text-gray-500 text-xs">{{ $user->employee_id }}</td>
                 <td class="px-5 py-3 text-gray-600">{{ $user->email }}</td>
-                <td class="px-5 py-3 text-gray-500">{{ $user->department }}</td>
+                <td class="px-5 py-3">
+                    <p class="font-medium text-gray-900 text-sm">{{ $user->designation ?: ucfirst(str_replace('_', ' ', $user->role)) }}</p>
+                    <p class="text-xs text-gray-400">{{ $user->department }}</p>
+                </td>
                 <td class="px-5 py-3">
                     <span class="text-xs px-2 py-0.5 rounded-full
                         @if($user->role === 'admin') bg-red-100 text-red-700

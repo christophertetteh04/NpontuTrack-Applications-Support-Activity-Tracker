@@ -26,15 +26,16 @@
                 "Visibility into every activity,<br>every shift, every handover."
             </blockquote>
             <div class="space-y-3">
-                @foreach(['Daily activity tracking', 'Shift handover visibility', 'Historical reporting', 'Team accountability'] as $feat)
+                <?php $__currentLoopData = ['Daily activity tracking', 'Shift handover visibility', 'Historical reporting', 'Team accountability']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $feat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="flex items-center gap-3 text-white/60 text-sm">
                     <svg class="w-4 h-4 text-blue-400 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                    {{ $feat }}
+                    <?php echo e($feat); ?>
+
                 </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
         </div>
-        <p class="text-white/20 font-mono text-xs">© {{ date('Y') }} Npontu Technologies. Applications Support Platform.</p>
+        <p class="text-white/20 font-mono text-xs">© <?php echo e(date('Y')); ?> Npontu Technologies. Applications Support Platform.</p>
     </div>
 
     
@@ -48,15 +49,29 @@
             <h2 class="text-2xl font-semibold text-gray-900 mb-1">Welcome back</h2>
             <p class="text-gray-500 text-sm mb-8">Sign in to the Applications Support Tracker</p>
 
-            <form action="{{ route('login') }}" method="POST" class="space-y-5">
-                @csrf
+            <form action="<?php echo e(route('login')); ?>" method="POST" class="space-y-5">
+                <?php echo csrf_field(); ?>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
-                    <input type="email" name="email" value="{{ old('email') }}" required autofocus
-                        class="w-full px-4 py-2.5 border @error('email') border-red-400 @else border-gray-300 @enderror rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-                    @error('email')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
+                    <input type="email" name="email" value="<?php echo e(old('email')); ?>" required autofocus
+                        class="w-full px-4 py-2.5 border <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-400 <?php else: ?> border-gray-300 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?> rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                    <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                    <p class="mt-1 text-xs text-red-600"><?php echo e($message); ?></p>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
@@ -78,3 +93,4 @@
     </div>
 </body>
 </html>
+<?php /**PATH /Users/imac/Projects/NpontuTrack-Applications-Support-Activity-Tracker/resources/views/auth/login.blade.php ENDPATH**/ ?>

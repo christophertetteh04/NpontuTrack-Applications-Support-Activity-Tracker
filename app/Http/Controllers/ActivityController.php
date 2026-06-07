@@ -10,7 +10,7 @@ class ActivityController extends Controller
 {
     public function __construct()
     {
-        // Only team leads and admins can create/edit activity definitions
+        
         $this->middleware(function ($request, $next) {
             if (!Auth::user()->isTeamLead() && in_array($request->route()->getActionMethod(), ['create', 'store', 'edit', 'update', 'destroy'])) {
                 abort(403, 'Only Team Leads and Admins can manage activity definitions.');

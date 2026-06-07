@@ -10,12 +10,7 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    /**
-     * Daily operations dashboard.
-     * Shows all active activities with their latest status for the selected date.
-     * Requirement 4: handover view — all personnel updates visible per activity per day.
-     */
-    public function index(Request $request)
+        public function index(Request $request)
     {
         $date = $request->input('date', Carbon::today()->toDateString());
         $carbonDate = Carbon::parse($date);
@@ -30,27 +25,49 @@ class DashboardController extends Controller
             }])
             ->get();
 
-        // Group by category for dashboard layout
         $grouped = $activities->groupBy('category');
 
-        // Summary counts for today
-        $todaysLogs = ActivityLog::forDate($date)->get();
+        $todaysLogs = ActivityLog::with(['activity', 'updater'])
+            ->forDate($date)
+            ->orderBy('updated_at_time', 'desc')
+            ->get();
+
+        $latestLogs = $todaysLogs
+            ->sortByDesc('updated_at_time')
+            ->unique('activity_id')
+            ->values();
+
+        $pendingHandover = $latestLogs
+            ->filter(fn($log) => $log->status !== 'done')
+            ->values();
+
+        $handoverByPerson = $pendingHandover
+            ->groupBy('updated_by')
+            ->map(fn($logs) => [
+                'name'        => $logs->first()->updater->name,
+                'employee_id' => $logs->first()->updater->employee_id,
+                'role'        => $logs->first()->updater->role,
+                'count'       => $logs->count(),
+                'latest_time' => $logs->first()->updated_at_time->format('H:i'),
+            ])
+            ->values();
+
+        $recentUpdates = $todaysLogs->take(6);
+
         $stats = [
             'total'       => $activities->count(),
-            'done'        => $todaysLogs->where('status', 'done')->unique('activity_id')->count(),
-            'pending'     => $activities->count() - $todaysLogs->where('status', 'done')->unique('activity_id')->count(),
-            'escalated'   => $todaysLogs->where('status', 'escalated')->unique('activity_id')->count(),
+            'done'        => $latestLogs->where('status', 'done')->count(),
+            'pending'     => $pendingHandover->count(),
+            'escalated'   => $latestLogs->where('status', 'escalated')->count(),
             'updates'     => $todaysLogs->count(),
             'personnel'   => $todaysLogs->unique('updated_by')->count(),
+            'handover'    => $pendingHandover->count(),
         ];
 
-        return view('dashboard', compact('grouped', 'date', 'carbonDate', 'stats'));
+        return view('dashboard', compact('grouped', 'date', 'carbonDate', 'stats', 'pendingHandover', 'handoverByPerson', 'recentUpdates'));
     }
 
-    /**
-     * Quick stats for homepage cards via AJAX.
-     */
-    public function stats(Request $request)
+        public function stats(Request $request)
     {
         $date = $request->input('date', Carbon::today()->toDateString());
         $logs = ActivityLog::forDate($date)->get();

@@ -10,11 +10,6 @@ use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
-    /**
-     * Reporting view.
-     * Requirement 5: query activity histories by custom date ranges,
-     * personnel, status, category.
-     */
     public function index(Request $request)
     {
         $filters = $request->validate([
@@ -55,7 +50,6 @@ class ReportController extends Controller
         $allLogs = $summaryQuery->get();
         $logs = $query->paginate(50)->withQueryString();
 
-        // Aggregate stats for the report header.
         $summary = [
             'total_updates' => $allLogs->count(),
             'done'          => $allLogs->where('status', 'done')->count(),
@@ -75,9 +69,6 @@ class ReportController extends Controller
         ));
     }
 
-    /**
-     * Export report as CSV.
-     */
     public function export(Request $request)
     {
         $filters  = $request->validate([
@@ -134,9 +125,6 @@ class ReportController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    /**
-     * Daily summary view — grouped by activity showing latest status per day.
-     */
     public function daily(Request $request)
     {
         $date = $request->input('date', Carbon::today()->toDateString());

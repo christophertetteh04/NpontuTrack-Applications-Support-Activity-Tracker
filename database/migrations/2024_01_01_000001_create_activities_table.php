@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->string('category'); // e.g. "SMS Monitoring", "System Health", "Incident"
+            $table->string('category'); 
             $table->integer('sort_order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
