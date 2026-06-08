@@ -104,8 +104,23 @@ The database is indexed for common access patterns (especially by date and activ
 This application is optimized for containerized environments. Recommended hosting paths:
 
 1. **VPS (DigitalOcean, Hetzner, Linode):** Ideal for running the provided `docker-compose.yml` directly on a Linux server.
-2. **Managed Container PaaS (Render, Railway):** Best for automated deployments from GitHub and managed SSL termination.
+2. **Managed Container PaaS (Render, Railway):** Best for automated deployments from GitHub.
+   - **Render Free Tier:** Use a "Web Service" connected to your GitHub repo.
+   - **Database:** Since Render's free tier is for PostgreSQL, use [Aiven.io](https://aiven.io/) for a **Free MySQL** instance to stay within a $0 budget.
 3. **Serverless Containers (Google Cloud Run):** A cost-effective option for low-traffic internal tools, as it scales based on request volume.
+
+---
+
+## 🚀 Quick Deployment Guide (Free Tier)
+
+1. **Push to GitHub:** Ensure your latest code is in a public or private GitHub repository.
+2. **Database:** Create a free MySQL instance on **Aiven.io**.
+3. **Render Deployment:**
+   - Log in to **Render.com** and create a **New Web Service**.
+   - Connect your GitHub repository.
+   - **Region:** Choose the one closest to you.
+   - **Environment Variables:** Add `APP_KEY`, `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`, and set `APP_DEBUG=false`.
+   - **Build Command:** Render will use your `Dockerfile`.
 
 _Note: Ensure `APP_DEBUG` is set to `false` and a strong `APP_KEY` is generated for any public-facing deployment._
 
