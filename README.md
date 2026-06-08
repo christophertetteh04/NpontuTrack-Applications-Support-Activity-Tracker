@@ -104,23 +104,31 @@ The database is indexed for common access patterns (especially by date and activ
 This application is optimized for containerized environments. Recommended hosting paths:
 
 1. **VPS (DigitalOcean, Hetzner, Linode):** Ideal for running the provided `docker-compose.yml` directly on a Linux server.
-2. **Managed Container PaaS (Render, Railway):** Best for automated deployments from GitHub.
-   - **Render Free Tier:** Use a "Web Service" connected to your GitHub repo.
-   - **Database:** Since Render's free tier is for PostgreSQL, use [Aiven.io](https://aiven.io/) for a **Free MySQL** instance to stay within a $0 budget.
-3. **Serverless Containers (Google Cloud Run):** A cost-effective option for low-traffic internal tools, as it scales based on request volume.
+2. **Managed Container PaaS (Railway - Recommended for ease):** Best for automated deployments from GitHub, as it natively supports `docker-compose.yml`.
+3. **Managed Container PaaS (Render):** Can be used with a `render.yaml` Blueprint, but requires more specific configuration for multi-service Docker setups and external databases for free tiers.
+4. **Serverless Containers (Google Cloud Run):** A cost-effective option for low-traffic internal tools, as it scales based on request volume.
 
 ---
 
-## 🚀 Quick Deployment Guide (Free Tier)
+## 🚀 Quick Deployment Guide (Railway Free Tier)
 
-1. **Push to GitHub:** Ensure your latest code is in a public or private GitHub repository.
-2. **Database:** Create a free MySQL instance on **Aiven.io**.
-3. **Render Deployment:**
-   - Log in to **Render.com** and create a **New Web Service**.
-   - Connect your GitHub repository.
-   - **Region:** Choose the one closest to you.
-   - **Environment Variables:** Add `APP_KEY`, `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`, and set `APP_DEBUG=false`.
-   - **Build Command:** Render will use your `Dockerfile`.
+1.  **Push to GitHub:** Ensure your latest code (including `docker-compose.yml` and your `Dockerfile`s) is in a public or private GitHub repository.
+2.  **Sign up for Railway:** Go to Railway.app and sign up (GitHub login is common).
+3.  **Create a New Project:**
+    - Choose "Deploy from GitHub Repo" or "New Project" -> "Deploy from GitHub Repo".
+    - Select your `christophertetteh04/NpontuTrack-Applications-Support-Activity-Tracker` repository.
+    - Railway will detect your `docker-compose.yml` and suggest deploying it. Confirm.
+4.  **Configure Environment Variables:**
+    - Go to your project settings in Railway.
+    - For each service (app, web, db), navigate to its "Variables" tab.
+    - Add `APP_KEY` (you can generate one with `php artisan key:generate --show` locally), `APP_URL` (this will be the public URL Railway provides for your `web` service), and ensure your `DB_` variables are correctly set. Railway might auto-populate some for its managed database.
+    - Set `APP_DEBUG=false` for production.
+5.  **Run Migrations:** Once services are deployed and running, access the `app` service's terminal in Railway and run:
+    ```bash
+    php artisan migrate --force
+    php artisan db:seed # (Optional, if you want initial data)
+    ```
+6.  **Access Live URL:** Railway will provide a public domain for your `web` service.
 
 _Note: Ensure `APP_DEBUG` is set to `false` and a strong `APP_KEY` is generated for any public-facing deployment._
 
