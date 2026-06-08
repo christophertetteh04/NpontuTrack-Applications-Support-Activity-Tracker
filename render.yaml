@@ -24,7 +24,7 @@ services:
           property: url
 
   # Private PHP-FPM Application Service
-  - type: privateService
+  - type: worker
     name: npontu-app
     env: docker
     # Use your existing Dockerfile for the PHP-FPM application
