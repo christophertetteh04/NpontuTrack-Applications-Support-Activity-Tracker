@@ -98,7 +98,7 @@
         </div>
         <?php endif; ?>
 
-        <?php if(auth()->user()->isTeamLead()): ?>
+        <?php if(in_array(auth()->user()->role, ['team_lead', 'admin'])): ?>
         <div class="mt-4 flex gap-3">
             <a href="<?php echo e(route('handover.index')); ?>"
                 class="text-xs text-gray-600 hover:text-gray-900 px-3 py-2 hover:bg-gray-100 rounded-lg transition">
@@ -160,7 +160,8 @@
                 <?php $__currentLoopData = $recentUpdates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $log): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="rounded-2xl border border-gray-100 p-4 bg-gray-50">
                     <div class="flex items-center gap-3">
-                        <span class="font-mono text-gray-400 text-xs"><?php echo e($log->updated_at_time->format('H:i')); ?></span>
+                        <span
+                            class="font-mono text-gray-400 text-xs"><?php echo e(\Carbon\Carbon::parse($log->updated_at_time)->format('H:i')); ?></span>
                         <span class="text-sm font-medium text-gray-900"><?php echo e($log->activity->title); ?></span>
                     </div>
                     <p class="text-xs text-gray-500 mt-1"><?php echo e($log->updater->name); ?> · <span
@@ -236,7 +237,7 @@
 
                         <div class="flex items-start gap-3 text-xs">
                             <span class="font-mono text-gray-400 shrink-0 w-14">
-                                <?php echo e($log->updated_at_time->format('H:i')); ?>
+                                <?php echo e(\Carbon\Carbon::parse($log->updated_at_time)->format('H:i')); ?>
 
                             </span>
 
@@ -274,7 +275,7 @@
 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
 <div class="text-center py-16 text-gray-400">
     <p class="text-lg">No activities configured.</p>
-    <?php if(auth()->user()->isTeamLead()): ?>
+    <?php if(in_array(auth()->user()->role, ['team_lead', 'admin'])): ?>
     <a href="<?php echo e(route('activities.create')); ?>" class="mt-2 inline-block text-sm text-blue-600 hover:underline">Add your
         first activity →</a>
     <?php endif; ?>
@@ -378,7 +379,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     let currentActivityId = null;
 
-    // Expose for inline onclick handlers on buttons
     window.openUpdateModal = function(button) {
         currentActivityId = button.dataset.activityId;
         const title = button.dataset.activityTitle || '';
@@ -387,7 +387,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('modal-log-date').value = date;
         const modal = document.getElementById('update-modal');
         modal.classList.remove('hidden');
-        // focus first input for accessibility
         const firstField = modal.querySelector('select[name="status"]') || modal.querySelector(
             'input, textarea');
         if (firstField) firstField.focus();

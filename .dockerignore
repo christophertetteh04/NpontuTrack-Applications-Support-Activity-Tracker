@@ -1,23 +1,21 @@
-# Ignore source control files
 .git
+.github
 .gitignore
-
-# Ignore local dependencies and build folders
-node_modules/
-dist/
-build/
-target/
-
-# Ignore logs and temp files
-*.log
-*.tmp
-.cache/
-
-# Ignore local environment variables and secrets (CRITICAL)
-.env
-*.pem
-secrets.txt
-
-# Ignore Docker configurations
-docker-compose.yml
 .dockerignore
+docker-compose.yml
+Dockerfile
+dockerfile
+app.conf
+README.md
+PRODUCTION_FEATURES.md
+vendor
+node_modules
+storage/logs/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/framework/cache/data/*
+public/storage
+tests
+.env
+.env.example
+.phpunit.result.cache

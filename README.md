@@ -1,163 +1,115 @@
 # NpontuTrack — Applications Support Activity Tracker
 
-A Laravel 11 web application for tracking daily activities of an Applications Support team.
+Laravel app for recording daily Applications Support activity updates and producing shift handover–friendly reporting.
 
----
+## What it tracks
 
-## Requirements Addressed
+- A defined list of activities (grouped by category)
+- Per-day updates for each activity (status + optional metrics/remark)
+- A complete timeline of updates (who changed what, and when)
+- Shift handover “seals” with a generated PDF summary
 
-# Requirement Implementation
+## Architecture (high level)
 
-1 Input daily activities (e.g. SMS count vs log count) - `activities` table + `expected_value` / `actual_value` / `variance` fields on every update
-2 Update status (done/pending) + remark per activity -- `ActivityLogController@store` — status enum + remark field  
- 3 Capture bio details of updater + timestamp - `updated_by` FK → users, `updated_at_time` timestamp auto-set  
- 4 Handover view — all updates per activity per day visible - Dashboard shows full timeline per activity; Daily Summary report  
- 5 Reporting by custom date range - Reports page with date range, activity, category, personnel, status filters + CSV export
-6 User authentication - Laravel Auth middleware, login/logout, role-based access
+- **Laravel 11** application
+- **Controllers** handle requests and authorization, e.g.:
+  - `ActivityLogController` stores activity updates and provides history responses/views
+  - Shift handover sealing handled by `ShiftSealController`
+- **Models** represent domain entities (Activity, ActivityLog, ShiftSeal, User)
+- **Views** are Blade templates (dashboard, activities, reports, and handover pages)
+- **Authorization** uses Laravel **policy-based** checks (role-based access)
+- **Audit model**: each activity update is stored as a new row in `activity_logs`
 
-## Tech Stack
+## Key design decisions
 
-- **Framework:** Laravel 11 (PHP 8.2+)
-- **Database:** SQLite (dev) / MySQL (production)
-- **Auth:** Laravel built-in session auth
-- **UI:** Blade templates + Tailwind CSS CDN + IBM Plex Sans/Mono
-- **No additional JS frameworks** — vanilla JS for modal interactions
+### 1) Append-only activity logs
 
-## Installation
+Updates do not overwrite previous records. Each update creates a new `activity_logs` entry, which ensures:
 
-### Prerequisites
+- Full history is always available for handovers
+- Reporting is based on an immutable audit trail
 
-- PHP 8.2+
-- Composer
-- Node.js (optional, for Vite asset compilation if extending)
+### 2) Change tracking on the timeline
 
-### Steps
+When saving a new update, the app captures the previous status for that activity on the selected date, so the UI can show what changed.
 
-```bash
-# 1. Clone / extract the project
-cd npontu-tracker
+### 3) Rate limiting on updates
 
-# 2. Install PHP dependencies
-composer install
+To prevent accidental double-submits or abuse, `ActivityLogController@store()` rate-limits updates per user (10 updates/minute). Responses degrade cleanly for JSON vs form/redirect requests.
 
-# 3. Copy environment file and generate key
-cp .env.example .env
-php artisan key:generate
+### 4) Soft deletes for activity definitions
 
-# 4. Create SQLite database file
-touch database/database.sqlite
+Activities can be deactivated/removed without losing historical logs.
 
-# 5. Run migrations
-php artisan migrate
+- Deleted activities are excluded by default
+- Admins can restore them
 
-# 6. Seed with sample data (10 activities, 4 users, 7 days of logs)
-php artisan db:seed
+### 5) Performance-friendly querying
 
-# 7. Start the dev server
-php artisan serve
-```
+The database is indexed for common access patterns (especially by date and activity/personnel filtering) to keep the dashboard and reporting responsive.
 
-Visit http://localhost:8000
+## Setup
 
-### Default Credentials (after seeding)
+### Local (recommended)
 
-## User Roles
+1. Install dependencies:
+   ```bash
+   composer install
+   ```
+2. Configure environment:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+3. Use SQLite for a quick start:
+   ```bash
+   touch database/database.sqlite
+   php artisan migrate
+   php artisan db:seed
+   ```
+4. Run:
+   ```bash
+   php artisan serve
+   ```
 
-Role - Permissions
+### Docker Compose (production-like)
 
-**Admin** - Full access — manage users, activities, view all reports  
- **Team Lead** - Manage activity definitions, update statuses, view reports
-**Staff** - Update activity statuses, view dashboard and reports
+1. Build and start containers:
+   ```bash
+   docker-compose up -d --build
+   ```
+2. Run migrations inside the app container:
+   ```bash
+   docker-compose exec app php artisan migrate
+   ```
 
-## Key Features
+## Main pages / routes
 
-## Daily Dashboard (`/`)
+- **Daily Dashboard**: activity overview by date, with per-activity update timeline
+- **Activities**: manage the activity definitions (categories, ordering, activation)
+- **Daily Summary**: a handover-friendly daily view
+- **Reports**: filterable reporting with CSV export
+- **Shift Handover Seal**: generates a signed PDF summary for a selected shift
+- **Users**: admin-only user management
 
-- Date-navigable board showing all activities grouped by category
-- Each activity card shows its full **update timeline** for the selected date
-- Each update entry shows: time, personnel name + employee ID, status, remark, and metric values
-- "Update" button opens a modal capturing status, remark, SMS/metric values, shift, and timestamp automatically
+## Security notes
 
-### Activity Management (`/activities`)
+- Authentication is handled by Laravel’s built-in session auth.
+- Authorization is policy-based (controllers call `$this->authorize(...)`).
+- CSRF protection is enabled for form submissions.
+- Activity update writes include validation and basic audit fields (timestamp, updater, originating IP).
 
-- Team Leads and Admins can create/edit/deactivate activity definitions
-- Activities have categories for grouping and a sort order for display priority
-- `datalist` suggestions for common categories (SMS Monitoring, System Health, etc.)
+## Hosting Recommendations
 
-### Daily Summary Report (`/reports/daily`)
+This application is optimized for containerized environments. Recommended hosting paths:
 
-- Printable daily view showing every activity with its complete update history
-- Latest update flagged with "← LATEST" indicator for easy handover reading
-- New handover board surfaces the latest pending updates and active contributors for day-to-day shift handovers
+1. **VPS (DigitalOcean, Hetzner, Linode):** Ideal for running the provided `docker-compose.yml` directly on a Linux server.
+2. **Managed Container PaaS (Render, Railway):** Best for automated deployments from GitHub and managed SSL termination.
+3. **Serverless Containers (Google Cloud Run):** A cost-effective option for low-traffic internal tools, as it scales based on request volume.
 
-### History Reports (`/reports`)
+_Note: Ensure `APP_DEBUG` is set to `false` and a strong `APP_KEY` is generated for any public-facing deployment._
 
-- Filter by: date range, activity, category, status, personnel, shift
-- Aggregate summary cards (total updates, done, pending, escalated, days covered, staff count)
-- Paginated results table (50 per page)
-- **CSV export** of filtered results
+## Development & CI
 
-### User Management (`/users`) — Admin only
-
-- Create/edit team members with employee ID, department, role, phone
-- Activate/deactivate accounts without deletion
-
-### Exports
-
-- CSV export is available from the Reports view. Use the Export CSV button to download filtered results.
-- Excel export: `GET /reports/export/excel` (requires `maatwebsite/excel` package). Example:
-
-```bash
-composer require maatwebsite/excel
-```
-
-- PDF export: `GET /reports/export/pdf` (requires `barryvdh/laravel-dompdf` or `dompdf/dompdf`). Example:
-
-```bash
-composer require barryvdh/laravel-dompdf
-```
-
-### Deployment
-
-Provided artifacts:
-
-- `Dockerfile` for building a PHP 8.2 FPM container
-- GitHub Actions workflow at `.github/workflows/ci.yml` to run migrations and tests on push
-
-To deploy using Docker Compose (Production-like environment):
-
-```bash
-
-# 2. Start the services
-docker-compose up -d --build
-
-# 3. Run migrations inside the container
-docker-compose exec app php artisan migrate
-```
-
-## Database Schema
-
-```
-users
-  id, name, employee_id, email, phone, department, role, password, is_active
-
-activities
-  id, title, description, category, sort_order, is_active, created_by
-
-activity_logs
-  id, activity_id, updated_by, log_date, status, remark,
-  expected_value, actual_value, variance, shift, updated_at_time
-```
-
-`activity_logs` is the core audit table — it is **append-only**. Every update creates a new row, preserving the full history for handover visibility and reporting.
-
----
-
-## Non-Functional Requirements Considered
-
-- **Security:** CSRF protection on all forms, authentication middleware on all routes, password hashing via `Hash::make`, role-based access control
-- **Performance:** Database indexes on `(log_date, activity_id)` and `(log_date, updated_by)` for fast daily queries
-- **Auditability:** Append-only log design — no updates are ever overwritten
-- **Usability:** Inline update modal eliminates page navigation; date picker for historical browsing
-- **Scalability:** Eager loading (`with()`) prevents N+1 queries; paginated report results
-- **Maintainability:** Thin controllers, model scopes (`forDate`, `forDateRange`, `forUser`, `withStatus`) for reusable query logic
+- CI runs PHPUnit tests and database migrations on push/PR against MySQL.
+- Container setup uses `Dockerfile` + `docker-compose.yml` with nginx (web) and php-fpm (app).

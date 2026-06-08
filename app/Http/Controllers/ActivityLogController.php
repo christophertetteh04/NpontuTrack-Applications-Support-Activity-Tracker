@@ -44,6 +44,13 @@ class ActivityLogController extends Controller
 
         $logDate = $data['log_date'] ?? Carbon::today()->toDateString();
 
+        // Automatically calculate variance if values are numeric
+        $variance = $data['variance'] ?? null;
+        if (is_numeric($data['expected_value']) && is_numeric($data['actual_value'])) {
+            $diff = (float)$data['actual_value'] - (float)$data['expected_value'];
+            $variance = ($diff >= 0 ? '+' : '') . $diff;
+        }
+
         $previousStatus = ActivityLog::where('activity_id', $activity->id)
             ->where('log_date', $logDate)
             ->latest('updated_at_time')
@@ -59,7 +66,7 @@ class ActivityLogController extends Controller
             'remark'         => $data['remark'] ?? null,
             'expected_value' => $data['expected_value'] ?? null,
             'actual_value'   => $data['actual_value'] ?? null,
-            'variance'       => $data['variance'] ?? null,
+            'variance'       => $variance,
             'shift'          => $data['shift'] ?? null,
             'updated_at_time'=> Carbon::now(),
             'ip_address'     => $request->ip(),
