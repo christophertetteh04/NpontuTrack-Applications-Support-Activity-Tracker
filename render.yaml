@@ -5,8 +5,6 @@ services:
     env: docker
     # Use a dedicated Dockerfile for Nginx to bake in the app.conf
     dockerfilePath: Dockerfile.nginx
-    # No specific build command needed if Dockerfile.nginx handles it
-    buildCommand: ""
     # Start Nginx in the foreground
     startCommand: "nginx -g 'daemon off;'"
     # Expose port 80 for HTTP traffic
@@ -26,15 +24,15 @@ services:
           property: url
 
   # Private PHP-FPM Application Service
-  - type: worker # Use 'worker' type for private services that don't need public HTTP access
+  - type: privateService
     name: npontu-app
     env: docker
     # Use your existing Dockerfile for the PHP-FPM application
     dockerfilePath: Dockerfile
-    # Install Composer dependencies during build
-    buildCommand: "composer install --no-dev --prefer-dist --no-interaction --no-progress"
     # Start PHP-FPM
     startCommand: "php-fpm"
+    # Internal port for PHP-FPM
+    port: 9000
     # Mount a persistent disk for storage (e.g., uploaded files, session data if using file driver)
     disks:
       - name: app-storage
@@ -45,31 +43,13 @@ services:
       - key: DB_CONNECTION
         value: mysql
       - key: DB_HOST
-        fromService:
-          name: npontu-db
-          property: host
+        sync: false # Set this in the Render Dashboard for Aiven host
       - key: DB_DATABASE
-        fromService:
-          name: npontu-db
-          property: database
+        sync: false # Set this in the Render Dashboard (usually 'defaultdb')
+      - key: DB_PORT
+        value: "26801" # Replace with your Aiven port
       - key: DB_USERNAME
-        fromService:
-          name: npontu-db
-          property: user
+        sync: false # Set this in the Render Dashboard (usually 'avnadmin')
       - key: DB_PASSWORD
-        fromService:
-          name: npontu-db
-          property: password
-
-  # Managed MySQL Database Service
-  - type: database
-    name: npontu-db
-    engine: mysql
-    version: "8" # Specify MySQL 8
-    # Allow internal Render services to connect
-    ipAllowList: []
-    # Persistent disk for database data
-    disk:
-      name: npontu-db-data
-      sizeGB: 10 # Adjust size as needed for your data
+        sync: false # Set this in the Render Dashboard
 ```
