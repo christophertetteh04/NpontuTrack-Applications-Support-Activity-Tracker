@@ -21,7 +21,8 @@ COPY www.conf /usr/local/etc/php-fpm.d/www.conf
 RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader && \
     php artisan storage:link && \
     chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
-    chown -R www-data:www-data /var/log/nginx /var/lib/nginx
+    chown -R www-data:www-data /var/log/nginx /var/lib/nginx && \
+    mkdir -p /var/log/supervisor
 
 # Setup MariaDB directories
 RUN mkdir -p /var/run/mysqld && chown mysql:mysql /var/run/mysqld
