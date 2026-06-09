@@ -12,6 +12,10 @@ services:
         value: "false"
       - key: APP_KEY
         generateValue: true
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: TRUSTED_PROXIES
+        value: "*"
       - key: APP_URL
         value: "https://npontu-track.onrender.com" # Update this with your actual Render URL after first deploy
       - key: DB_CONNECTION

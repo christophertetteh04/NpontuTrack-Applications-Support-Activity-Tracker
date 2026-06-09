@@ -21,4 +21,4 @@ RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --opt
 
 EXPOSE 80
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD php artisan migrate --force && /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
