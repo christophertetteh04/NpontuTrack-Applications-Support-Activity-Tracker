@@ -15,11 +15,23 @@ COPY app.conf /etc/nginx/sites-available/default
 RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Configure PHP-FPM to listen on TCP 127.0.0.1:9000 to match nginx fastcgi_pass
+COPY www.conf /usr/local/etc/php-fpm.d/www.conf
+
 RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader && \
+<<<<<<< HEAD
     chown -R www-data:www-data /var/www/html && \
     chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache && \
     php artisan storage:link || true && \
     chown -R www-data:www-data /var/log/nginx /var/lib/nginx
+=======
+    php artisan storage:link && \
+    chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
+    chown -R www-data:www-data /var/log/nginx /var/lib/nginx && \
+    mkdir -p /var/log/supervisor && \
+    # Remove stale nginx PID left by apt post-install hooks so supervisord can start nginx cleanly
+    rm -f /run/nginx.pid
+>>>>>>> b2f7ba31ef6e8d3b92dafc03bdc4a7e53527f536
 
 # Setup MariaDB directories
 RUN mkdir -p /var/run/mysqld && chown mysql:mysql /var/run/mysqld
