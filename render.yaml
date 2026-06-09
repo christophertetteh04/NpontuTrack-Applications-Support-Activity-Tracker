@@ -2,7 +2,7 @@ services:
   # Native PHP Web Service (No Docker)
   - type: web
     name: npontu-native
-    runtime: php
+    runtime: static
     buildCommand: "composer install --no-dev --optimize-autoloader"
     startCommand: "touch database/database.sqlite && php artisan migrate --force --seed && php artisan serve --host 0.0.0.0 --port $PORT"
     plan: free
