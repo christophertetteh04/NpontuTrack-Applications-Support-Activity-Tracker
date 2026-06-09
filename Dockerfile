@@ -15,6 +15,9 @@ COPY app.conf /etc/nginx/sites-available/default
 RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Configure PHP-FPM to listen on TCP 127.0.0.1:9000 to match nginx fastcgi_pass
+COPY www.conf /usr/local/etc/php-fpm.d/www.conf
+
 RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader && \
     php artisan storage:link && \
     chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
