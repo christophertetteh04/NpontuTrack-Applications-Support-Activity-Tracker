@@ -22,7 +22,9 @@ RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --opt
     php artisan storage:link && \
     chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
     chown -R www-data:www-data /var/log/nginx /var/lib/nginx && \
-    mkdir -p /var/log/supervisor
+    mkdir -p /var/log/supervisor && \
+    # Remove stale nginx PID left by apt post-install hooks so supervisord can start nginx cleanly
+    rm -f /run/nginx.pid
 
 # Setup MariaDB directories
 RUN mkdir -p /var/run/mysqld && chown mysql:mysql /var/run/mysqld
