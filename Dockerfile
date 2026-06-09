@@ -16,8 +16,9 @@ RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader && \
-    php artisan storage:link && \
-    chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
+    chown -R www-data:www-data /var/www/html && \
+    chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache && \
+    php artisan storage:link || true && \
     chown -R www-data:www-data /var/log/nginx /var/lib/nginx
 
 # Setup MariaDB directories
