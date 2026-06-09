@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         
-        $admin = User::create([
+        $admin = User::updateOrCreate([
             'name'        => 'Kwame Asante',
             'employee_id' => 'NPT-001',
             'email'       => 'admin@npontu.com',
@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             'is_active'   => true,
         ]);
 
-        $lead = User::create([
+        $lead = User::updateOrCreate([
             'name'        => 'Abena Mensah',
             'employee_id' => 'NPT-002',
             'email'       => 'lead@npontu.com',
@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
             'is_active'   => true,
         ]);
 
-        $staff = User::create([
+        $staff = User::updateOrCreate([
             'name'        => 'Kofi Boateng',
             'employee_id' => 'NPT-003',
             'email'       => 'staff@npontu.com',
@@ -50,7 +50,7 @@ class DatabaseSeeder extends Seeder
             'is_active'   => true,
         ]);
 
-        $staff2 = User::create([
+        $staff2 = User::updateOrCreate([
             'name'        => 'Ama Owusu',
             'employee_id' => 'NPT-004',
             'email'       => 'staff2@npontu.com',
