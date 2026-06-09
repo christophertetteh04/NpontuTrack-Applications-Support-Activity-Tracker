@@ -1,7 +1,7 @@
 services:
-  # PHP-FPM Application Service
+  # Unified Web Service (Nginx + PHP-FPM)
   - type: web
-    name: npontu-app
+    name: npontu-track
     runtime: docker
     dockerfilePath: Dockerfile
     plan: free # Note: PHP-FPM may require a 'privateService' (Paid) to bypass HTTP health checks
@@ -13,10 +13,7 @@ services:
       - key: APP_KEY
         generateValue: true
       - key: APP_URL
-        fromService:
-          type: web
-          name: npontu-web
-          property: host
+        value: "https://npontu-track.onrender.com" # Update this with your actual Render URL after first deploy
       - key: DB_CONNECTION
         value: mysql
       - key: DB_HOST
@@ -29,10 +26,3 @@ services:
         value: ""
       - key: DB_PASSWORD
         value: ""
-
-  # Nginx Web Server Service
-  - type: web
-    name: npontu-web
-    runtime: docker
-    dockerfilePath: Dockerfile.nginx
-    plan: free
