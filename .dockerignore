@@ -5,7 +5,6 @@
 docker-compose.yml
 Dockerfile
 dockerfile
-app.conf
 README.md
 PRODUCTION_FEATURES.md
 vendor
