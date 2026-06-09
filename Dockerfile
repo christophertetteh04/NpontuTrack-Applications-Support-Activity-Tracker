@@ -23,11 +23,11 @@ RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --opt
 # Setup MariaDB directories
 RUN mkdir -p /var/run/mysqld && chown mysql:mysql /var/run/mysqld
 
+# Prepare Entrypoint
+COPY entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 EXPOSE 80
 
-CMD service mariadb start && \
-    until mysqladmin ping >/dev/null 2>&1; do echo "Waiting for MariaDB..."; sleep 2; done && \
-    mysql -e "CREATE DATABASE IF NOT EXISTS npontu; CREATE USER IF NOT EXISTS 'sail'@'localhost' IDENTIFIED BY 'password'; GRANT ALL PRIVILEGES ON npontu.* TO 'sail'@'localhost'; FLUSH PRIVILEGES;" && \
-    php artisan migrate --force && \
-    (php artisan db:seed --force || true) && \
-    /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+ENTRYPOINT ["entrypoint.sh"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
