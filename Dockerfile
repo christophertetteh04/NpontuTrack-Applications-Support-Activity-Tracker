@@ -17,7 +17,8 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader && \
     php artisan storage:link && \
-    chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+    chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
+    chown -R www-data:www-data /var/log/nginx /var/lib/nginx
 
 # Setup MariaDB directories
 RUN mkdir -p /var/run/mysqld && chown mysql:mysql /var/run/mysqld
