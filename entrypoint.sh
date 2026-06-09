@@ -1,11 +1,11 @@
 #!/bin/sh
 set -e
 
-# Start MariaDB in the background
-service mariadb start
+# Start MariaDB directly (not via `service`, which requires an init system unavailable in Docker)
+mysqld_safe --skip-networking=0 &
 
 # Wait for MariaDB to be ready before proceeding
-until mysqladmin ping >/dev/null 2>&1; do
+until mysqladmin ping --silent; do
   echo "Waiting for MariaDB..."
   sleep 2
 done
