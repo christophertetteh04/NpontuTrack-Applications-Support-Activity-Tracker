@@ -6,6 +6,8 @@ primary_region = "ams"
 
 [env]
   APP_ENV = "production"
+  APP_URL = "https://npontutrack-activity-tracker.fly.dev"
+  TRUSTED_PROXIES = "*"
   LOG_CHANNEL = "stderr"
   SESSION_DRIVER = "cookie"
   CACHE_STORE = "database"
