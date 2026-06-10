@@ -20,7 +20,7 @@ until mysqladmin ping --silent; do
 done
 
 # Initialize Database, User, and run Migrations/Seeding
-mysql -e "CREATE DATABASE IF NOT EXISTS npontu; CREATE USER IF NOT EXISTS 'sail'@'localhost' IDENTIFIED BY 'password'; GRANT ALL PRIVILEGES ON npontu.* TO 'sail'@'localhost'; FLUSH PRIVILEGES;"
+mysql -e "CREATE DATABASE IF NOT EXISTS \`${DB_DATABASE:-npontu}\`; CREATE USER IF NOT EXISTS '${DB_USERNAME:-sail}'@'%' IDENTIFIED BY '${DB_PASSWORD:-password}'; GRANT ALL PRIVILEGES ON \`${DB_DATABASE:-npontu}\`.* TO '${DB_USERNAME:-sail}'@'%'; FLUSH PRIVILEGES;"
 php artisan migrate --force
 (php artisan db:seed --force || echo "Seeding skipped or already exists")
 
