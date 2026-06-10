@@ -1,0 +1,42 @@
+app = "npontutrack-activity-tracker"
+primary_region = "ams"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  APP_ENV = "production"
+  LOG_CHANNEL = "stderr"
+  SESSION_DRIVER = "cookie"
+  CACHE_STORE = "database"
+  DB_CONNECTION = "mysql"
+
+[[mounts]]
+  source = "npontutrack_storage"
+  destination = "/var/www/html/storage"
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 80
+  processes = ["app"]
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [[services.concurrency]]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.http_checks]]
+    interval = "10s"
+    grace_period = "5s"
+    method = "get"
+    path = "/up"
+    protocol = "http"
+    timeout = "2s"
